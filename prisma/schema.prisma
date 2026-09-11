@@ -117,6 +117,7 @@ model Usuario {
   lecturasComunicados        ComunicadoLectura[]
   pqrsRadicados              Pqrs[]                     @relation("PqrsRadicadoPor")
   pqrsAsignados              Pqrs[]                     @relation("PqrsAsignadoA")
+  pqrsRespondidos            Pqrs[]                     @relation("PqrsRespondidoPor")
 
   @@index([rol])
   @@map("usuarios")
@@ -403,12 +404,15 @@ model Pqrs {
   radicadoPorId        String     @db.Uuid
   asignadoAId          String?    @db.Uuid
   incidentePrincipalId String?    @db.Uuid
+  respondidoPorId      String?    @db.Uuid
   codigoRadicado       String     @unique
   tipo                 TipoPQRS
   titulo               String
   descripcion          String
   urlFoto              String?
   estado               EstadoPQRS @default(ABIERTO)
+  respuestaAdmin       String?
+  respondidoEn         DateTime?
   fechaCierre          DateTime?
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
@@ -417,6 +421,7 @@ model Pqrs {
   inmueble           Inmueble @relation(fields: [inmuebleId], references: [id])
   radicadoPor        Usuario  @relation("PqrsRadicadoPor", fields: [radicadoPorId], references: [id])
   asignadoA          Usuario? @relation("PqrsAsignadoA", fields: [asignadoAId], references: [id])
+  respondidoPor      Usuario? @relation("PqrsRespondidoPor", fields: [respondidoPorId], references: [id])
   // Auto-relación para agrupar tickets duplicados bajo un "Incidente Principal" (HU-06).
   incidentePrincipal Pqrs?    @relation("AgrupacionIncidente", fields: [incidentePrincipalId], references: [id])
   ticketsAgrupados   Pqrs[]   @relation("AgrupacionIncidente")

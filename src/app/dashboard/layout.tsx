@@ -1,3 +1,5 @@
+import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+
 export default function DashboardLayout({
   children,
 }: LayoutProps<"/dashboard">) {
@@ -13,12 +15,7 @@ export default function DashboardLayout({
               Hub Operativo de Propiedad Horizontal
             </p>
           </div>
-          <nav className="flex gap-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            <span className="text-zinc-900 dark:text-zinc-50">Dashboard</span>
-            <span className="cursor-not-allowed opacity-50">Copropiedades</span>
-            <span className="cursor-not-allowed opacity-50">Cartera</span>
-            <span className="cursor-not-allowed opacity-50">PQRS</span>
-          </nav>
+          <DashboardNav />
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
