@@ -1,6 +1,20 @@
 import { cache } from "react";
-import { EstadoCuenta } from "@prisma/client";
+import { EstadoCuenta, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+
+/** Saldo aún exigible de una cuenta: total + recargos de mora - lo ya pagado. */
+export function calcularSaldoPendiente(cuenta: {
+  totalAPagar: Prisma.Decimal;
+  montoPagado: Prisma.Decimal;
+  recargosMora: { monto: Prisma.Decimal }[];
+}): Prisma.Decimal {
+  const totalRecargos = cuenta.recargosMora.reduce(
+    (suma, recargo) => suma.plus(recargo.monto),
+    new Prisma.Decimal(0)
+  );
+  const saldo = cuenta.totalAPagar.plus(totalRecargos).minus(cuenta.montoPagado);
+  return saldo.greaterThan(0) ? saldo : new Prisma.Decimal(0);
+}
 
 const ESTADOS_POR_COBRAR: EstadoCuenta[] = [
   EstadoCuenta.PENDIENTE,
@@ -29,6 +43,7 @@ export const getCuentasDeCobroRecientes = cache(
         id: true,
         periodo: true,
         totalAPagar: true,
+        montoPagado: true,
         estado: true,
         fechaLimitePago: true,
         inmueble: {

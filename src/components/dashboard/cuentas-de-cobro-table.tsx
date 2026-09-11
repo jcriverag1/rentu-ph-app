@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
-import type { CuentaDeCobroReciente } from "@/lib/data/cuentas-cobro";
+import { EstadoCuenta } from "@prisma/client";
+import {
+  calcularSaldoPendiente,
+  type CuentaDeCobroReciente,
+} from "@/lib/data/cuentas-cobro";
 import { EstadoCuentaBadge } from "@/components/dashboard/estado-badge";
+import { RegistrarPagoForm } from "@/components/dashboard/registrar-pago-form";
 import { formatearFecha, formatearMoneda, formatearPeriodo } from "@/lib/formatters";
 
 export function CuentasDeCobroTable({
@@ -25,8 +30,10 @@ export function CuentasDeCobroTable({
             <Th>Copropiedad</Th>
             <Th>Periodo</Th>
             <Th className="text-right">Total a pagar</Th>
+            <Th className="text-right">Saldo pendiente</Th>
             <Th>Vence</Th>
             <Th>Estado</Th>
+            <Th>Acciones</Th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
@@ -34,6 +41,8 @@ export function CuentasDeCobroTable({
             const recargoActivo = cuenta.recargosMora.find(
               (recargo) => !recargo.congelado
             );
+            const saldoPendiente = calcularSaldoPendiente(cuenta);
+            const estaPagada = cuenta.estado === EstadoCuenta.PAGADA;
 
             return (
               <tr key={cuenta.id}>
@@ -52,9 +61,22 @@ export function CuentasDeCobroTable({
                     </span>
                   ) : null}
                 </Td>
+                <Td className="text-right font-medium tabular-nums">
+                  {estaPagada ? "—" : formatearMoneda(saldoPendiente)}
+                </Td>
                 <Td>{formatearFecha(cuenta.fechaLimitePago)}</Td>
                 <Td>
                   <EstadoCuentaBadge estado={cuenta.estado} />
+                </Td>
+                <Td>
+                  {estaPagada ? (
+                    <span className="text-xs text-zinc-400">—</span>
+                  ) : (
+                    <RegistrarPagoForm
+                      cuentaDeCobroId={cuenta.id}
+                      saldoPendiente={saldoPendiente.toFixed(2)}
+                    />
+                  )}
                 </Td>
               </tr>
             );

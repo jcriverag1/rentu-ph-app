@@ -9,6 +9,7 @@ import {
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CopropiedadesGrid } from "@/components/dashboard/copropiedades-grid";
 import { CuentasDeCobroTable } from "@/components/dashboard/cuentas-de-cobro-table";
+import { GenerarCuentasForm } from "@/components/dashboard/generar-cuentas-form";
 import { formatearMoneda } from "@/lib/formatters";
 
 export const metadata = {
@@ -44,6 +45,15 @@ export default async function DashboardPage() {
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          Generación de cartera
+        </h2>
+        <Suspense fallback={<SeccionSkeleton lineas={2} />}>
+          <SeccionGenerarCuentas administradorId={administrador.id} />
+        </Suspense>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
           Cuentas de cobro recientes
         </h2>
         <Suspense fallback={<SeccionSkeleton lineas={5} />}>
@@ -51,6 +61,19 @@ export default async function DashboardPage() {
         </Suspense>
       </section>
     </div>
+  );
+}
+
+async function SeccionGenerarCuentas({
+  administradorId,
+}: {
+  administradorId: string;
+}) {
+  const copropiedades = await getCopropiedadesDelAdministrador(administradorId);
+  return (
+    <GenerarCuentasForm
+      copropiedades={copropiedades.map(({ id, nombre }) => ({ id, nombre }))}
+    />
   );
 }
 
