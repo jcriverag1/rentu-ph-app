@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { Building2 } from "lucide-react";
-
-const ENLACES = [
-  { href: "#por-que-rentu", etiqueta: "Beneficios" },
-  { href: "#modulos", etiqueta: "Módulos" },
-  { href: "#copiloto", etiqueta: "Copiloto IA" },
-] as const;
+import { ENLACES_NAV } from "@/components/landing/nav-links";
 
 export function SiteFooter() {
   const anio = new Date().getFullYear();
@@ -23,10 +18,10 @@ export function SiteFooter() {
         </Link>
 
         <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-zinc-500">
-          {ENLACES.map((enlace) => (
-            <a key={enlace.href} href={enlace.href} className="hover:text-brand-700">
+          {ENLACES_NAV.map((enlace) => (
+            <Link key={enlace.href} href={enlace.href} className="hover:text-brand-700">
               {enlace.etiqueta}
-            </a>
+            </Link>
           ))}
           <Link href="/login" className="hover:text-brand-700">
             Ingresar al Portal

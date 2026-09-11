@@ -46,12 +46,43 @@ async function upsertInmueble(
   identificador: string,
   coeficiente: string,
   areaM2: string,
-  estado: EstadoInmueble = EstadoInmueble.OCUPADO
+  opciones: {
+    estado?: EstadoInmueble;
+    // Marketplace de arriendo (HU marketplace) — `disponibleArriendo` es
+    // `true` por defecto en el schema; aquí se marca en `false` a los
+    // inmuebles que ya tienen un residente activo, para que el catálogo
+    // sembrado sea coherente (no se lista lo que ya está ocupado/rentado).
+    disponibleArriendo?: boolean;
+    canonArriendo?: string;
+    habitaciones?: number;
+    banos?: number;
+    descripcionArriendo?: string;
+    imagenUrl?: string;
+  } = {}
 ) {
+  const {
+    estado = EstadoInmueble.OCUPADO,
+    disponibleArriendo = true,
+    canonArriendo,
+    habitaciones,
+    banos,
+    descripcionArriendo,
+    imagenUrl,
+  } = opciones;
+
+  const datosArriendo = {
+    disponibleArriendo,
+    canonArriendo,
+    habitaciones,
+    banos,
+    descripcionArriendo,
+    imagenUrl,
+  };
+
   return prisma.inmueble.upsert({
     where: { copropiedadId_identificador: { copropiedadId, identificador } },
-    update: {},
-    create: { copropiedadId, identificador, coeficiente, areaM2, estado },
+    update: datosArriendo,
+    create: { copropiedadId, identificador, coeficiente, areaM2, estado, ...datosArriendo },
   });
 }
 
@@ -154,24 +185,79 @@ async function main() {
   // ---------------------------------------------------------------------
   // 3. Inmuebles (10): 4 en Cedritos, 3 en Santa Bárbara, 3 en Suba
   // ---------------------------------------------------------------------
-  const apto101 = await upsertInmueble(cedritos.id, "Apto 101", "0.25000", "72.50");
-  const apto102 = await upsertInmueble(cedritos.id, "Apto 102", "0.25000", "72.50");
-  await upsertInmueble(cedritos.id, "Apto 103", "0.25000", "68.00");
-  await upsertInmueble(cedritos.id, "Apto 104", "0.25000", "68.00");
+  // Los inmuebles con residente activo (101, 102, 201, 301) quedan con
+  // `disponibleArriendo: false` — ya están ocupados, no tiene sentido
+  // listarlos en el marketplace. Los demás quedan disponibles con datos
+  // de arriendo realistas para poblar /propiedades.
+  const apto101 = await upsertInmueble(cedritos.id, "Apto 101", "0.25000", "72.50", {
+    disponibleArriendo: false,
+  });
+  const apto102 = await upsertInmueble(cedritos.id, "Apto 102", "0.25000", "72.50", {
+    disponibleArriendo: false,
+  });
+  await upsertInmueble(cedritos.id, "Apto 103", "0.25000", "68.00", {
+    canonArriendo: "1850000",
+    habitaciones: 2,
+    banos: 2,
+    descripcionArriendo:
+      "Apartamento luminoso en Cedritos, cerca de zonas comerciales y transporte público. Cocina integral y balcón.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+  });
+  await upsertInmueble(cedritos.id, "Apto 104", "0.25000", "68.00", {
+    canonArriendo: "1830000",
+    habitaciones: 2,
+    banos: 2,
+    descripcionArriendo:
+      "Cómodo apartamento en conjunto residencial con zonas verdes y vigilancia 24 horas.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+  });
 
-  const apto201 = await upsertInmueble(santaBarbara.id, "Apto 201", "0.33333", "95.00");
-  await upsertInmueble(santaBarbara.id, "Apto 202", "0.33333", "90.00");
-  await upsertInmueble(santaBarbara.id, "Apto 203", "0.33334", "90.00");
+  const apto201 = await upsertInmueble(santaBarbara.id, "Apto 201", "0.33333", "95.00", {
+    disponibleArriendo: false,
+  });
+  await upsertInmueble(santaBarbara.id, "Apto 202", "0.33333", "90.00", {
+    canonArriendo: "2400000",
+    habitaciones: 3,
+    banos: 2,
+    descripcionArriendo:
+      "Amplio apartamento en Torres de Santa Bárbara, sector exclusivo con fácil acceso a la Autopista Norte.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
+  });
+  await upsertInmueble(santaBarbara.id, "Apto 203", "0.33334", "90.00", {
+    canonArriendo: "2420000",
+    habitaciones: 3,
+    banos: 2,
+    descripcionArriendo:
+      "Apartamento con excelente iluminación natural y closets empotrados en todas las habitaciones.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80",
+  });
 
-  const apto301 = await upsertInmueble(suba.id, "Apto 301", "0.33333", "80.00");
-  const apto302 = await upsertInmueble(
-    suba.id,
-    "Apto 302",
-    "0.33333",
-    "80.00",
-    EstadoInmueble.DESOCUPADO // ver Caso Borde de offboarding, más abajo
-  );
-  await upsertInmueble(suba.id, "Apto 303", "0.33334", "85.00");
+  const apto301 = await upsertInmueble(suba.id, "Apto 301", "0.33333", "80.00", {
+    disponibleArriendo: false,
+  });
+  const apto302 = await upsertInmueble(suba.id, "Apto 302", "0.33333", "80.00", {
+    estado: EstadoInmueble.DESOCUPADO, // ver Caso Borde de offboarding, más abajo
+    canonArriendo: "2100000",
+    habitaciones: 3,
+    banos: 2,
+    descripcionArriendo:
+      "Apartamento recién desocupado en Reserva de Suba, listo para arrendar. Incluye parqueadero cubierto.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
+  });
+  await upsertInmueble(suba.id, "Apto 303", "0.33334", "85.00", {
+    canonArriendo: "2150000",
+    habitaciones: 3,
+    banos: 2,
+    descripcionArriendo:
+      "Apartamento esquinero con ventilación cruzada, a pocos minutos del Humedal Córdoba.",
+    imagenUrl:
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+  });
 
   // ---------------------------------------------------------------------
   // 4. Residentes (5)

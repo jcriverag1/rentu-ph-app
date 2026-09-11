@@ -8,6 +8,7 @@ const ENLACES = [
   { href: "/dashboard", etiqueta: "Dashboard" },
   { href: "/dashboard/pqrs", etiqueta: "PQRS" },
   { href: "/dashboard/reservas", etiqueta: "Reservas" },
+  { href: "/dashboard/propiedades", etiqueta: "Propiedades" },
 ] as const;
 
 export function DashboardNav() {

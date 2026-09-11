@@ -3,12 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-
-const ENLACES = [
-  { href: "#por-que-rentu", etiqueta: "Beneficios" },
-  { href: "#modulos", etiqueta: "Módulos" },
-  { href: "#copiloto", etiqueta: "Copiloto IA" },
-] as const;
+import { ENLACES_NAV } from "@/components/landing/nav-links";
 
 export function MobileNav() {
   const [abierto, setAbierto] = useState(false);
@@ -28,15 +23,15 @@ export function MobileNav() {
       {abierto ? (
         <div className="absolute inset-x-0 top-full border-b border-zinc-200 bg-white px-6 py-4 shadow-lg">
           <nav className="flex flex-col gap-3 text-sm font-medium text-zinc-700">
-            {ENLACES.map((enlace) => (
-              <a
+            {ENLACES_NAV.map((enlace) => (
+              <Link
                 key={enlace.href}
                 href={enlace.href}
                 onClick={() => setAbierto(false)}
                 className="py-1"
               >
                 {enlace.etiqueta}
-              </a>
+              </Link>
             ))}
             <Link
               href="/login"

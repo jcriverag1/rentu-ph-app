@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { MobileNav } from "@/components/landing/mobile-nav";
-
-const ENLACES = [
-  { href: "#por-que-rentu", etiqueta: "Beneficios" },
-  { href: "#modulos", etiqueta: "Módulos" },
-  { href: "#copiloto", etiqueta: "Copiloto IA" },
-] as const;
+import { ENLACES_NAV } from "@/components/landing/nav-links";
 
 export function SiteHeader() {
   return (
@@ -22,10 +17,14 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 sm:flex">
-          {ENLACES.map((enlace) => (
-            <a key={enlace.href} href={enlace.href} className="transition-colors hover:text-brand-700">
+          {ENLACES_NAV.map((enlace) => (
+            <Link
+              key={enlace.href}
+              href={enlace.href}
+              className="transition-colors hover:text-brand-700"
+            >
               {enlace.etiqueta}
-            </a>
+            </Link>
           ))}
         </nav>
 

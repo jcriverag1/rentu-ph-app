@@ -177,6 +177,16 @@ model Inmueble {
   coeficiente   Decimal        @db.Decimal(7, 5) // coeficiente de copropiedad (Ley 675)
   areaM2        Decimal?       @db.Decimal(8, 2)
   estado        EstadoInmueble @default(OCUPADO)
+
+  // --- Marketplace de arriendo (publicación pública en /propiedades) -------
+  // `areaM2` de arriba se reutiliza para el catálogo — no se duplica el campo.
+  disponibleArriendo Boolean   @default(true)
+  canonArriendo      Decimal?  @db.Decimal(12, 2)
+  habitaciones       Int?
+  banos              Int?
+  descripcionArriendo String?
+  imagenUrl          String?
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
@@ -191,6 +201,7 @@ model Inmueble {
 
   @@unique([copropiedadId, identificador])
   @@index([copropiedadId])
+  @@index([disponibleArriendo])
   @@map("inmuebles")
 }
 
