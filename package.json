@@ -8,7 +8,8 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "provision:auth": "tsx scripts/provisionar-usuario-auth.ts"
+    "provision:auth": "tsx scripts/provisionar-usuario-auth.ts",
+    "db:vector-index": "tsx scripts/crear-indices-vectoriales.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.67",

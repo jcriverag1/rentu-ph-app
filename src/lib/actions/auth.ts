@@ -25,19 +25,40 @@ export async function iniciarSesion(
     return { status: "error", message: "Ingresa un correo y contraseña válidos." };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(validado.data);
+  // `redirect()` lanza una señal interna (NEXT_REDIRECT) que un catch de
+  // más arriba interceptaría por error — por eso se llama SIEMPRE fuera del
+  // try/catch, calculando el destino adentro.
+  let destino = "/dashboard";
 
-  if (error) {
-    return { status: "error", message: "Correo o contraseña incorrectos." };
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signInWithPassword(validado.data);
+
+    if (error) {
+      return { status: "error", message: "Correo o contraseña incorrectos." };
+    }
+
+    const destinoParam = formData.get("next");
+    if (typeof destinoParam === "string" && destinoParam.startsWith("/")) {
+      destino = destinoParam;
+    }
+  } catch (error) {
+    console.error("iniciarSesion", error);
+    return {
+      status: "error",
+      message: "No se pudo iniciar sesión. Intenta de nuevo en un momento.",
+    };
   }
 
-  const destino = formData.get("next");
-  redirect(typeof destino === "string" && destino.startsWith("/") ? destino : "/dashboard");
+  redirect(destino);
 }
 
 export async function cerrarSesion() {
-  const supabase = await createSupabaseServerClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createSupabaseServerClient();
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error("cerrarSesion", error);
+  }
   redirect("/login");
 }
