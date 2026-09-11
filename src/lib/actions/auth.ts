@@ -29,11 +29,7 @@ export async function iniciarSesion(
   const { error } = await supabase.auth.signInWithPassword(validado.data);
 
   if (error) {
-    // DIAGNÓSTICO TEMPORAL — revertir después de confirmar la env var.
-    return {
-      status: "error",
-      message: `Correo o contraseña incorrectos. [debug url=${process.env.NEXT_PUBLIC_SUPABASE_URL} anonLen=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length} err=${error.message}]`,
-    };
+    return { status: "error", message: "Correo o contraseña incorrectos." };
   }
 
   const destino = formData.get("next");
