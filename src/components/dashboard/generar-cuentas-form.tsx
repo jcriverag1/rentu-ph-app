@@ -2,10 +2,8 @@
 
 import { useActionState, useId, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
-import {
-  generarCuentasDeCobroMensual,
-  estadoInicialAccionGeneracion,
-} from "@/lib/actions/cuentas-cobro";
+import { generarCuentasDeCobroMensual } from "@/lib/actions/cuentas-cobro";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonGenerar() {
   const { pending } = useFormStatus();
@@ -38,7 +36,7 @@ export function GenerarCuentasForm({
 }) {
   const [estado, accion] = useActionState(
     generarCuentasDeCobroMensual,
-    estadoInicialAccionGeneracion
+    ESTADO_INICIAL_ACCION
   );
   const idCopropiedad = useId();
   const idPeriodo = useId();

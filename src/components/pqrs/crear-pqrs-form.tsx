@@ -3,7 +3,8 @@
 import { useActionState, useId, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { TipoPQRS } from "@prisma/client";
-import { crearPqrs, estadoInicialAccionPqrs } from "@/lib/actions/pqrs";
+import { crearPqrs } from "@/lib/actions/pqrs";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 import type { CopropiedadParaPqrs } from "@/lib/data/pqrs";
 
 const TIPOS_PQRS = [
@@ -32,7 +33,7 @@ export function CrearPqrsForm({
 }: {
   copropiedades: CopropiedadParaPqrs[];
 }) {
-  const [estado, accion] = useActionState(crearPqrs, estadoInicialAccionPqrs);
+  const [estado, accion] = useActionState(crearPqrs, ESTADO_INICIAL_ACCION);
 
   const [copropiedadId, setCopropiedadId] = useState(copropiedades[0]?.id ?? "");
   const copropiedad = copropiedades.find((c) => c.id === copropiedadId);

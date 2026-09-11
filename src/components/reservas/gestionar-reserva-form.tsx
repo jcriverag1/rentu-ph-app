@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { EstadoReserva } from "@prisma/client";
-import {
-  actualizarEstadoReserva,
-  estadoInicialAccionReserva,
-} from "@/lib/actions/reservas";
+import { actualizarEstadoReserva } from "@/lib/actions/reservas";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonEstado({
   estado,
@@ -38,7 +36,7 @@ export function GestionarReservaForm({
   reservaId: string;
   estadoActual: EstadoReserva;
 }) {
-  const [estado, accion] = useActionState(actualizarEstadoReserva, estadoInicialAccionReserva);
+  const [estado, accion] = useActionState(actualizarEstadoReserva, ESTADO_INICIAL_ACCION);
 
   return (
     <div className="flex flex-col gap-1.5">

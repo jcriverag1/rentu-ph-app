@@ -2,10 +2,8 @@
 
 import { useActionState, useId } from "react";
 import { useFormStatus } from "react-dom";
-import {
-  indexarDocumento,
-  estadoInicialAccionDocumento,
-} from "@/lib/actions/documentos";
+import { indexarDocumento } from "@/lib/actions/documentos";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 const TIPOS_DOCUMENTO = [
   { value: "REGLAMENTO_PH", label: "Reglamento de PH" },
@@ -34,7 +32,7 @@ export function SubirDocumentoForm({
 }) {
   const [estado, accion] = useActionState(
     indexarDocumento,
-    estadoInicialAccionDocumento
+    ESTADO_INICIAL_ACCION
   );
   const idCopropiedad = useId();
   const idTipo = useId();

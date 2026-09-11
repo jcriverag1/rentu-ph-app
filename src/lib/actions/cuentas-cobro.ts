@@ -6,16 +6,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAdministradorActual } from "@/lib/session";
 import { generarCuentasDeCobroSchema } from "@/lib/validations/cuentas-cobro";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionGeneracion = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  errores?: Record<string, string[] | undefined>;
-};
-
-export const estadoInicialAccionGeneracion: EstadoAccionGeneracion = {
-  status: "idle",
-};
+export type EstadoAccionGeneracion = EstadoAccionFormulario;
 
 /**
  * Genera una cuenta de cobro por cada inmueble activo (no eliminado) de la

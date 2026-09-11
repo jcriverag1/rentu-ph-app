@@ -2,7 +2,8 @@
 
 import { useActionState, useId, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { crearReserva, estadoInicialAccionReserva } from "@/lib/actions/reservas";
+import { crearReserva } from "@/lib/actions/reservas";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 import type { CopropiedadParaReservas } from "@/lib/data/reservas";
 
 function BotonRadicar() {
@@ -23,7 +24,7 @@ export function CrearReservaForm({
 }: {
   copropiedades: CopropiedadParaReservas[];
 }) {
-  const [estado, accion] = useActionState(crearReserva, estadoInicialAccionReserva);
+  const [estado, accion] = useActionState(crearReserva, ESTADO_INICIAL_ACCION);
 
   const [copropiedadId, setCopropiedadId] = useState(copropiedades[0]?.id ?? "");
   const copropiedad = copropiedades.find((c) => c.id === copropiedadId);

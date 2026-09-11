@@ -3,11 +3,9 @@
 import { useActionState, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { EstadoPQRS } from "@prisma/client";
-import {
-  responderPqrs,
-  estadoInicialAccionPqrs,
-} from "@/lib/actions/pqrs";
+import { responderPqrs } from "@/lib/actions/pqrs";
 import { ETIQUETAS_ESTADO_PQRS } from "@/components/pqrs/estado-pqrs-badge";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonGuardar() {
   const { pending } = useFormStatus();
@@ -31,7 +29,7 @@ export function ResponderPqrsForm({
   estadoActual: EstadoPQRS;
   respuestaActual: string | null;
 }) {
-  const [estado, accion] = useActionState(responderPqrs, estadoInicialAccionPqrs);
+  const [estado, accion] = useActionState(responderPqrs, ESTADO_INICIAL_ACCION);
   const [abierto, setAbierto] = useState(false);
   const estadoId = useId();
   const respuestaId = useId();

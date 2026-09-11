@@ -14,14 +14,9 @@ import {
   crearReservaSchema,
   crearZonaComunSchema,
 } from "@/lib/validations/reservas";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionReserva = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  errores?: Record<string, string[] | undefined>;
-};
-
-export const estadoInicialAccionReserva: EstadoAccionReserva = { status: "idle" };
+export type EstadoAccionReserva = EstadoAccionFormulario;
 
 export async function crearZonaComun(
   _prevState: EstadoAccionReserva,

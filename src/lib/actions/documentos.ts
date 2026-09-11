@@ -8,16 +8,9 @@ import { getAdministradorActual } from "@/lib/session";
 import { generarEmbeddings } from "@/lib/ai/embeddings";
 import { trocearTexto } from "@/lib/ai/chunking";
 import { indexarDocumentoSchema } from "@/lib/validations/documentos";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionDocumento = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  errores?: Record<string, string[] | undefined>;
-};
-
-export const estadoInicialAccionDocumento: EstadoAccionDocumento = {
-  status: "idle",
-};
+export type EstadoAccionDocumento = EstadoAccionFormulario;
 
 /**
  * Indexa un documento de la PH: lo trocea, genera un embedding local por

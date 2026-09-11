@@ -6,14 +6,9 @@ import { EstadoPQRS } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAdministradorActual } from "@/lib/session";
 import { crearPqrsSchema, responderPqrsSchema } from "@/lib/validations/pqrs";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionPqrs = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  errores?: Record<string, string[] | undefined>;
-};
-
-export const estadoInicialAccionPqrs: EstadoAccionPqrs = { status: "idle" };
+export type EstadoAccionPqrs = EstadoAccionFormulario;
 
 async function generarCodigoRadicado(): Promise<string> {
   const anio = new Date().getFullYear();

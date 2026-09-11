@@ -3,13 +3,9 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionLogin = {
-  status: "idle" | "error";
-  message?: string;
-};
-
-export const estadoInicialAccionLogin: EstadoAccionLogin = { status: "idle" };
+export type EstadoAccionLogin = EstadoAccionFormulario;
 
 const loginSchema = z.object({
   email: z.email("Ingresa un correo válido"),

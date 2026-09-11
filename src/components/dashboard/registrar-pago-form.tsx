@@ -5,9 +5,9 @@ import { useFormStatus } from "react-dom";
 import {
   registrarPago,
   registrarPagoTotalDesdeFormulario,
-  estadoInicialAccionPago,
 } from "@/lib/actions/pagos";
 import { METODOS_PAGO } from "@/lib/validations/pagos";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonAbonar() {
   const { pending } = useFormStatus();
@@ -45,11 +45,11 @@ export function RegistrarPagoForm({
   const montoId = useId();
   const [estadoAbono, accionAbono] = useActionState(
     registrarPago,
-    estadoInicialAccionPago
+    ESTADO_INICIAL_ACCION
   );
   const [estadoTotal, accionTotal] = useActionState(
     registrarPagoTotalDesdeFormulario,
-    estadoInicialAccionPago
+    ESTADO_INICIAL_ACCION
   );
 
   const estado = estadoAbono.status !== "idle" ? estadoAbono : estadoTotal;

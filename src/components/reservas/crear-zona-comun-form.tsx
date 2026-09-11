@@ -2,7 +2,8 @@
 
 import { useActionState, useId } from "react";
 import { useFormStatus } from "react-dom";
-import { crearZonaComun, estadoInicialAccionReserva } from "@/lib/actions/reservas";
+import { crearZonaComun } from "@/lib/actions/reservas";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonCrear() {
   const { pending } = useFormStatus();
@@ -22,7 +23,7 @@ export function CrearZonaComunForm({
 }: {
   copropiedades: { id: string; nombre: string }[];
 }) {
-  const [estado, accion] = useActionState(crearZonaComun, estadoInicialAccionReserva);
+  const [estado, accion] = useActionState(crearZonaComun, ESTADO_INICIAL_ACCION);
   const idCopropiedad = useId();
   const idNombre = useId();
   const idAforo = useId();

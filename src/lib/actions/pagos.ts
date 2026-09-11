@@ -7,14 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { getAdministradorActual } from "@/lib/session";
 import { calcularSaldoPendiente } from "@/lib/data/cuentas-cobro";
 import { registrarPagoSchema } from "@/lib/validations/pagos";
+import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
-export type EstadoAccionPago = {
-  status: "idle" | "error" | "success";
-  message?: string;
-  errores?: Record<string, string[] | undefined>;
-};
-
-export const estadoInicialAccionPago: EstadoAccionPago = { status: "idle" };
+export type EstadoAccionPago = EstadoAccionFormulario;
 
 async function aplicarPago(params: {
   cuentaDeCobroId: string;

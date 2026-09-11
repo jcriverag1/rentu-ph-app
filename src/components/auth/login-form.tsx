@@ -2,7 +2,8 @@
 
 import { useActionState, useId } from "react";
 import { useFormStatus } from "react-dom";
-import { iniciarSesion, estadoInicialAccionLogin } from "@/lib/actions/auth";
+import { iniciarSesion } from "@/lib/actions/auth";
+import { ESTADO_INICIAL_ACCION } from "@/lib/types/estado-accion";
 
 function BotonIngresar() {
   const { pending } = useFormStatus();
@@ -18,7 +19,7 @@ function BotonIngresar() {
 }
 
 export function LoginForm({ next }: { next?: string }) {
-  const [estado, accion] = useActionState(iniciarSesion, estadoInicialAccionLogin);
+  const [estado, accion] = useActionState(iniciarSesion, ESTADO_INICIAL_ACCION);
   const emailId = useId();
   const passwordId = useId();
 
