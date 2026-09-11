@@ -6,10 +6,14 @@ import {
   getCuentasDeCobroRecientes,
   getResumenCartera,
 } from "@/lib/data/cuentas-cobro";
+import { getDocumentosPHDelAdministrador } from "@/lib/data/documentos-ph";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CopropiedadesGrid } from "@/components/dashboard/copropiedades-grid";
 import { CuentasDeCobroTable } from "@/components/dashboard/cuentas-de-cobro-table";
 import { GenerarCuentasForm } from "@/components/dashboard/generar-cuentas-form";
+import { SubirDocumentoForm } from "@/components/dashboard/subir-documento-form";
+import { DocumentosPHList } from "@/components/dashboard/documentos-ph-list";
+import { CopilotoChat } from "@/components/dashboard/copiloto-chat";
 import { formatearMoneda } from "@/lib/formatters";
 
 export const metadata = {
@@ -60,6 +64,33 @@ export default async function DashboardPage() {
           <SeccionCuentasDeCobro administradorId={administrador.id} />
         </Suspense>
       </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          Copiloto Administrativo
+        </h2>
+        <Suspense fallback={<SeccionSkeleton lineas={2} />}>
+          <SeccionCopiloto administradorId={administrador.id} />
+        </Suspense>
+      </section>
+    </div>
+  );
+}
+
+async function SeccionCopiloto({ administradorId }: { administradorId: string }) {
+  const [copropiedades, documentos] = await Promise.all([
+    getCopropiedadesDelAdministrador(administradorId),
+    getDocumentosPHDelAdministrador(administradorId),
+  ]);
+  const opcionesCopropiedad = copropiedades.map(({ id, nombre }) => ({ id, nombre }));
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="flex flex-col gap-4">
+        <SubirDocumentoForm copropiedades={opcionesCopropiedad} />
+        <DocumentosPHList documentos={documentos} />
+      </div>
+      <CopilotoChat copropiedades={opcionesCopropiedad} />
     </div>
   );
 }

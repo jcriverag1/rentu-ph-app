@@ -21,13 +21,15 @@
 // =============================================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
 }
 
 // ----------------------------- ENUMS ----------------------------------------
@@ -84,6 +86,13 @@ enum EstadoPQRS {
   CERRADO
 }
 
+enum TipoDocumentoPH {
+  REGLAMENTO_PH
+  MANUAL_CONVIVENCIA
+  ACTA_ASAMBLEA
+  OTRO
+}
+
 // --------------------------- IDENTIDAD Y RBAC -------------------------------
 
 model Usuario {
@@ -103,6 +112,7 @@ model Usuario {
   comprobantesCargados       ComprobantePago[]          @relation("ComprobanteCargadoPor")
   comprobantesRevisados      ComprobantePago[]          @relation("ComprobanteRevisadoPor")
   pagosRegistrados           Pago[]                     @relation("PagoRegistradoPor")
+  documentosPHSubidos        DocumentoPH[]              @relation("DocumentoPHSubidoPor")
   comunicadosPublicados      Comunicado[]               @relation("ComunicadoPublicadoPor")
   lecturasComunicados        ComunicadoLectura[]
   pqrsRadicados              Pqrs[]                     @relation("PqrsRadicadoPor")
@@ -126,6 +136,7 @@ model Copropiedad {
   inmuebles       Inmueble[]
   mantenimientos  Mantenimiento[]
   comunicados     Comunicado[]
+  documentosPH    DocumentoPH[]
 
   @@map("copropiedades")
 }
@@ -413,4 +424,47 @@ model Pqrs {
   @@index([inmuebleId])
   @@index([estado])
   @@map("pqrs")
+}
+
+// --------------------- COPILOTO ADMINISTRATIVO (RAG) ------------------------
+// Documentos de la copropiedad (reglamentos, manuales de convivencia, actas)
+// indexados para responder preguntas del Administrador con contexto real.
+// Los embeddings se generan LOCALMENTE con @xenova/transformers (sin API de
+// pago) y se guardan en pgvector; el campo `embedding` es `Unsupported` porque
+// Prisma Client no modela `vector` de forma nativa — toda lectura/escritura de
+// `DocumentoPHChunk` pasa por SQL crudo ($queryRaw/$executeRaw), ver
+// `src/lib/ai/`.
+
+model DocumentoPH {
+  id            String          @id @default(uuid()) @db.Uuid
+  copropiedadId String          @db.Uuid
+  subidoPorId   String          @db.Uuid
+  tipo          TipoDocumentoPH
+  titulo        String
+  contenido     String // texto completo (pegado o extraído), fuente para re-indexar
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?
+
+  copropiedad Copropiedad        @relation(fields: [copropiedadId], references: [id])
+  subidoPor   Usuario            @relation("DocumentoPHSubidoPor", fields: [subidoPorId], references: [id])
+  chunks      DocumentoPHChunk[]
+
+  @@index([copropiedadId])
+  @@map("documentos_ph")
+}
+
+model DocumentoPHChunk {
+  id          String   @id @default(uuid()) @db.Uuid
+  documentoId String   @db.Uuid
+  indice      Int // orden del fragmento dentro del documento
+  contenido   String
+  // vector(384) — dimensión de Xenova/paraphrase-multilingual-MiniLM-L12-v2.
+  embedding   Unsupported("vector(384)")
+  createdAt   DateTime @default(now())
+
+  documento DocumentoPH @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@index([documentoId])
+  @@map("documento_ph_chunks")
 }
