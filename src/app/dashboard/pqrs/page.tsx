@@ -42,7 +42,7 @@ export default async function PqrsPage(props: PageProps<"/dashboard/pqrs">) {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
           PQRS y convivencia
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">

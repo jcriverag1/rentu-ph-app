@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdministradorActual } from "@/lib/session";
 import {
   existeCruceDeHorario,
-  inmuebleEstaEnMora,
+  inmuebleNoEstaAPazYSalvo,
 } from "@/lib/data/reservas";
 import {
   actualizarEstadoReservaSchema,
@@ -75,7 +75,7 @@ export async function crearZonaComun(
   }
 }
 
-/** Radica una solicitud de reserva. Bloquea inmuebles en mora y cruces de horario. */
+/** Radica una solicitud de reserva. Bloquea inmuebles sin paz y salvo (VENCIDA/EN_MORA) y cruces de horario. */
 export async function crearReserva(
   _prevState: EstadoAccionReserva,
   formData: FormData
@@ -135,11 +135,13 @@ export async function crearReserva(
       };
     }
 
-    // Regla de negocio: un inmueble en mora no puede solicitar reservas.
-    if (await inmuebleEstaEnMora(inmuebleId)) {
+    // Regla de negocio: un inmueble sin paz y salvo (vencido o en mora) no
+    // puede solicitar reservas.
+    if (await inmuebleNoEstaAPazYSalvo(inmuebleId)) {
       return {
         status: "error",
-        message: "Este inmueble tiene cuentas en mora. Debe estar a paz y salvo para solicitar una reserva.",
+        message:
+          "Este inmueble tiene cuentas vencidas o en mora. Debe estar a paz y salvo para solicitar una reserva.",
       };
     }
 
@@ -214,11 +216,11 @@ export async function actualizarEstadoReserva(
     }
 
     if (estado === EstadoReserva.CONFIRMADA) {
-      // La mora pudo aparecer después de radicada la solicitud: se revalida.
-      if (await inmuebleEstaEnMora(reserva.inmuebleId)) {
+      // El estado de cartera pudo cambiar después de radicada la solicitud: se revalida.
+      if (await inmuebleNoEstaAPazYSalvo(reserva.inmuebleId)) {
         return {
           status: "error",
-          message: "No se puede confirmar: el inmueble tiene cuentas en mora.",
+          message: "No se puede confirmar: el inmueble tiene cuentas vencidas o en mora.",
         };
       }
 

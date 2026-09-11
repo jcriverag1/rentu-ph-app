@@ -108,13 +108,21 @@ export type CopropiedadParaReservas = Awaited<
   ReturnType<typeof getCopropiedadesParaReservas>
 >[number];
 
-/** true si el inmueble tiene alguna cuenta de cobro EN_MORA (no pagada). */
-export async function inmuebleEstaEnMora(inmuebleId: string): Promise<boolean> {
-  const cuentaEnMora = await prisma.cuentaDeCobro.findFirst({
-    where: { inmuebleId, deletedAt: null, estado: EstadoCuenta.EN_MORA },
+/**
+ * true si el inmueble tiene alguna cuenta de cobro VENCIDA o EN_MORA (no
+ * está a paz y salvo). Ambos estados bloquean reservas — no solo la mora
+ * ya escalada.
+ */
+export async function inmuebleNoEstaAPazYSalvo(inmuebleId: string): Promise<boolean> {
+  const cuentaPendienteCritica = await prisma.cuentaDeCobro.findFirst({
+    where: {
+      inmuebleId,
+      deletedAt: null,
+      estado: { in: [EstadoCuenta.VENCIDA, EstadoCuenta.EN_MORA] },
+    },
     select: { id: true },
   });
-  return cuentaEnMora !== null;
+  return cuentaPendienteCritica !== null;
 }
 
 /** true si ya existe una reserva PENDIENTE/CONFIRMADA que se cruza en el tiempo. */

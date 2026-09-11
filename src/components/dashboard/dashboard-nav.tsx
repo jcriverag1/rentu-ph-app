@@ -23,8 +23,8 @@ export function DashboardNav() {
             href={enlace.href}
             className={
               activo
-                ? "text-zinc-900 dark:text-zinc-50"
-                : "hover:text-zinc-700 dark:hover:text-zinc-200"
+                ? "text-brand-700 dark:text-brand-400"
+                : "hover:text-brand-700 dark:hover:text-brand-400"
             }
           >
             {enlace.etiqueta}

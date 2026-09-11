@@ -5,6 +5,38 @@
   --foreground: #171717;
 }
 
+/*
+ * Sistema de diseño Rentu — paleta unificada para Landing y Dashboard.
+ * `brand` (azul, confianza/marca) y `accent` (amarillo, energía/CTA) son
+ * tokens semánticos: el resto de la app usa `bg-brand-600`, `text-accent-500`,
+ * etc. en vez de nombres de color literales, para poder re-tematizar desde
+ * un solo lugar. La escala neutra (fondos, bordes, texto) sigue siendo
+ * `zinc`, ya nativa de Tailwind — no necesita redefinirse.
+ */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
