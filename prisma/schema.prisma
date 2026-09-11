@@ -93,6 +93,12 @@ enum TipoDocumentoPH {
   OTRO
 }
 
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+}
+
 // --------------------------- IDENTIDAD Y RBAC -------------------------------
 
 model Usuario {
@@ -118,6 +124,7 @@ model Usuario {
   pqrsRadicados              Pqrs[]                     @relation("PqrsRadicadoPor")
   pqrsAsignados              Pqrs[]                     @relation("PqrsAsignadoA")
   pqrsRespondidos            Pqrs[]                     @relation("PqrsRespondidoPor")
+  reservasSolicitadas        Reserva[]                  @relation("ReservaSolicitadaPor")
 
   @@index([rol])
   @@map("usuarios")
@@ -138,6 +145,7 @@ model Copropiedad {
   mantenimientos  Mantenimiento[]
   comunicados     Comunicado[]
   documentosPH    DocumentoPH[]
+  zonasComunes    ZonaComun[]
 
   @@map("copropiedades")
 }
@@ -179,6 +187,7 @@ model Inmueble {
   mascotas       Mascota[]
   cuentasDeCobro CuentaDeCobro[]
   pqrs           Pqrs[]
+  reservas       Reserva[]
 
   @@unique([copropiedadId, identificador])
   @@index([copropiedadId])
@@ -472,4 +481,51 @@ model DocumentoPHChunk {
 
   @@index([documentoId])
   @@map("documento_ph_chunks")
+}
+
+// ------------------------ ZONAS COMUNES Y RESERVAS --------------------------
+
+model ZonaComun {
+  id            String    @id @default(uuid()) @db.Uuid
+  copropiedadId String    @db.Uuid
+  nombre        String // ej. "Salón social", "Zona BBQ", "Cancha múltiple"
+  descripcion   String?
+  aforo         Int
+  costo         Decimal   @default(0) @db.Decimal(12, 2)
+  activa        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  copropiedad Copropiedad @relation(fields: [copropiedadId], references: [id])
+  reservas    Reserva[]
+
+  @@index([copropiedadId])
+  @@map("zonas_comunes")
+}
+
+// Regla de negocio (ver Server Action `crearReserva` / `actualizarEstadoReserva`
+// en `src/lib/actions/reservas.ts`): un inmueble con cuentas de cobro en
+// EN_MORA no puede solicitar ni confirmar reservas hasta ponerse a paz y salvo.
+model Reserva {
+  id              String        @id @default(uuid()) @db.Uuid
+  zonaComunId     String        @db.Uuid
+  inmuebleId      String        @db.Uuid
+  solicitadaPorId String        @db.Uuid
+  fechaInicio     DateTime
+  fechaFin        DateTime
+  estado          EstadoReserva @default(PENDIENTE)
+  observaciones   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  zonaComun     ZonaComun @relation(fields: [zonaComunId], references: [id])
+  inmueble      Inmueble  @relation(fields: [inmuebleId], references: [id])
+  solicitadaPor Usuario   @relation("ReservaSolicitadaPor", fields: [solicitadaPorId], references: [id])
+
+  @@index([zonaComunId])
+  @@index([inmuebleId])
+  @@index([fechaInicio])
+  @@map("reservas")
 }

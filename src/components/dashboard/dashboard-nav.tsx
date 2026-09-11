@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cerrarSesion } from "@/lib/actions/auth";
 
 const ENLACES = [
   { href: "/dashboard", etiqueta: "Dashboard" },
   { href: "/dashboard/pqrs", etiqueta: "PQRS" },
+  { href: "/dashboard/reservas", etiqueta: "Reservas" },
 ] as const;
 
 export function DashboardNav() {
@@ -31,6 +33,11 @@ export function DashboardNav() {
       })}
       <span className="cursor-not-allowed opacity-50">Copropiedades</span>
       <span className="cursor-not-allowed opacity-50">Cartera</span>
+      <form action={cerrarSesion}>
+        <button type="submit" className="hover:text-zinc-700 dark:hover:text-zinc-200">
+          Cerrar sesión
+        </button>
+      </form>
     </nav>
   );
 }

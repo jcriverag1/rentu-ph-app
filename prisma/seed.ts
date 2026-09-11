@@ -91,13 +91,18 @@ async function main() {
   // 1. Administrador (1)
   // ---------------------------------------------------------------------
   const admin = await prisma.usuario.upsert({
-    where: { email: "admin@rentu.com.co" },
-    update: {},
+    where: { email: "juliancriverag@gmail.com" },
+    update: {
+      nombre: "Julian Rivera",
+      email: "juliancriverag@gmail.com",
+      telefono: "+57 300 765 2849",
+      rol: RolUsuario.ADMINISTRADOR,
+    },
     create: {
-      nombre: "Julián Rivera",
-      email: "admin@rentu.com.co",
+      nombre: "Julian Rivera",
+      email: "juliancriverag@gmail.com",
       passwordHash: PASSWORD_DEMO,
-      telefono: "+57 300 555 0100",
+      telefono: "+57 300 765 2849",
       rol: RolUsuario.ADMINISTRADOR,
     },
   });
