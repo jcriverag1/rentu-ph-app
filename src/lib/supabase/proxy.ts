@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { RolUsuario } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const PREFIJOS_PROTEGIDOS = ["/dashboard"];
+const PREFIJOS_PROTEGIDOS = ["/dashboard", "/portal"];
 
 /**
  * Refresca la sesión de Supabase en cada request y protege las rutas del
@@ -49,11 +51,20 @@ export async function actualizarSesion(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && request.nextUrl.pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+  if (user?.email && request.nextUrl.pathname === "/login") {
+    // Puntual (solo en esta rama, no en cada request): decide a cuál área
+    // manda a alguien que ya tiene sesión pero visita /login de nuevo.
+    const usuario = await prisma.usuario.findFirst({
+      where: { email: user.email, deletedAt: null },
+      select: { rol: true },
+    });
+
+    if (usuario) {
+      const url = request.nextUrl.clone();
+      url.pathname = usuario.rol === RolUsuario.ADMINISTRADOR ? "/dashboard" : "/portal";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

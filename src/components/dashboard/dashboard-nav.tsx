@@ -9,6 +9,7 @@ const ENLACES = [
   { href: "/dashboard/pqrs", etiqueta: "PQRS" },
   { href: "/dashboard/reservas", etiqueta: "Reservas" },
   { href: "/dashboard/propiedades", etiqueta: "Propiedades" },
+  { href: "/dashboard/residentes", etiqueta: "Residentes" },
 ] as const;
 
 export function DashboardNav() {

@@ -124,6 +124,7 @@ model Usuario {
   pqrsRadicados              Pqrs[]                     @relation("PqrsRadicadoPor")
   pqrsAsignados              Pqrs[]                     @relation("PqrsAsignadoA")
   pqrsRespondidos            Pqrs[]                     @relation("PqrsRespondidoPor")
+  pqrsDirigidas              Pqrs[]                     @relation("PqrsDirigidoA")
   reservasSolicitadas        Reserva[]                  @relation("ReservaSolicitadaPor")
 
   @@index([rol])
@@ -425,6 +426,10 @@ model Pqrs {
   asignadoAId          String?    @db.Uuid
   incidentePrincipalId String?    @db.Uuid
   respondidoPorId      String?    @db.Uuid
+  // Residente hacia quien va dirigida la PQRS cuando quien la radica es el
+  // Administrador (ver `crearPqrs` en src/lib/actions/pqrs.ts) — null cuando
+  // es el propio residente quien la radica a nombre propio (`crearPqrsResidente`).
+  dirigidoAId          String?    @db.Uuid
   codigoRadicado       String     @unique
   tipo                 TipoPQRS
   titulo               String
@@ -442,12 +447,14 @@ model Pqrs {
   radicadoPor        Usuario  @relation("PqrsRadicadoPor", fields: [radicadoPorId], references: [id])
   asignadoA          Usuario? @relation("PqrsAsignadoA", fields: [asignadoAId], references: [id])
   respondidoPor      Usuario? @relation("PqrsRespondidoPor", fields: [respondidoPorId], references: [id])
+  dirigidoA          Usuario? @relation("PqrsDirigidoA", fields: [dirigidoAId], references: [id])
   // Auto-relación para agrupar tickets duplicados bajo un "Incidente Principal" (HU-06).
   incidentePrincipal Pqrs?    @relation("AgrupacionIncidente", fields: [incidentePrincipalId], references: [id])
   ticketsAgrupados   Pqrs[]   @relation("AgrupacionIncidente")
 
   @@index([inmuebleId])
   @@index([estado])
+  @@index([dirigidoAId])
   @@map("pqrs")
 }
 

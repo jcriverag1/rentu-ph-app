@@ -34,12 +34,41 @@ export const getPqrsDeAdministrador = cache(
           },
         },
         radicadoPor: { select: { nombre: true } },
+        dirigidoA: { select: { nombre: true } },
       },
     });
   }
 );
 
 export type PqrsConDetalle = Awaited<ReturnType<typeof getPqrsDeAdministrador>>[number];
+
+/** PQRS propias del residente: las que él mismo radicó y las que el Administrador dirigió hacia él. */
+export const getPqrsDeResidente = cache(async (usuarioId: string, inmuebleId: string) => {
+  return prisma.pqrs.findMany({
+    where: {
+      deletedAt: null,
+      inmuebleId,
+      OR: [{ radicadoPorId: usuarioId }, { dirigidoAId: usuarioId }],
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      codigoRadicado: true,
+      tipo: true,
+      titulo: true,
+      descripcion: true,
+      estado: true,
+      respuestaAdmin: true,
+      respondidoEn: true,
+      createdAt: true,
+      radicadoPorId: true,
+      dirigidoAId: true,
+      radicadoPor: { select: { nombre: true } },
+    },
+  });
+});
+
+export type PqrsDeResidente = Awaited<ReturnType<typeof getPqrsDeResidente>>[number];
 
 /** Conteo de PQRS por estado, para las tarjetas de KPI y las pestañas de filtro. */
 export const getResumenPqrs = cache(async (administradorId: string) => {

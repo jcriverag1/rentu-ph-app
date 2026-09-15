@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { EstadoReserva } from "@prisma/client";
 import { getAdministradorActual } from "@/lib/session";
+import { getCopropiedadesDelAdministrador } from "@/lib/data/copropiedades";
 import {
-  getCopropiedadesParaReservas,
   getReservasDeAdministrador,
   getZonasComunesDeAdministrador,
 } from "@/lib/data/reservas";
 import { CrearZonaComunForm } from "@/components/reservas/crear-zona-comun-form";
 import { ZonasComunesList } from "@/components/reservas/zonas-comunes-list";
-import { CrearReservaForm } from "@/components/reservas/crear-reserva-form";
 import { AgendaReservas } from "@/components/reservas/agenda-reservas";
 import { ETIQUETAS_ESTADO_RESERVA } from "@/components/reservas/estado-reserva-badge";
 
@@ -37,7 +36,7 @@ export default async function ReservasPage(props: PageProps<"/dashboard/reservas
   const [zonas, reservas, copropiedades] = await Promise.all([
     getZonasComunesDeAdministrador(administrador.id),
     getReservasDeAdministrador(administrador.id, estadoFiltro),
-    getCopropiedadesParaReservas(administrador.id),
+    getCopropiedadesDelAdministrador(administrador.id),
   ]);
 
   return (
@@ -47,7 +46,8 @@ export default async function ReservasPage(props: PageProps<"/dashboard/reservas
           Reservas de zonas comunes
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Un inmueble con cuentas en mora no puede solicitar ni confirmar reservas.
+          Los residentes radican sus propias reservas desde su portal. Un inmueble con cuentas
+          en mora no puede solicitar ni confirmar reservas.
         </p>
       </div>
 
@@ -57,11 +57,6 @@ export default async function ReservasPage(props: PageProps<"/dashboard/reservas
         <CrearZonaComunForm
           copropiedades={copropiedades.map(({ id, nombre }) => ({ id, nombre }))}
         />
-      </section>
-
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Radicar reserva</h2>
-        <CrearReservaForm copropiedades={copropiedades} />
       </section>
 
       <section className="flex flex-col gap-4">

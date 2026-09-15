@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { EstadoReserva, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getAdministradorActual } from "@/lib/session";
+import { getAdministradorActual, getResidenteActual } from "@/lib/session";
 import {
   existeCruceDeHorario,
   inmuebleNoEstaAPazYSalvo,
@@ -75,15 +75,13 @@ export async function crearZonaComun(
   }
 }
 
-/** Radica una solicitud de reserva. Bloquea inmuebles sin paz y salvo (VENCIDA/EN_MORA) y cruces de horario. */
-export async function crearReserva(
+/** El residente radica su propia solicitud de reserva. Bloquea inmuebles sin paz y salvo (VENCIDA/EN_MORA) y cruces de horario. */
+export async function crearReservaResidente(
   _prevState: EstadoAccionReserva,
   formData: FormData
 ): Promise<EstadoAccionReserva> {
   const validado = crearReservaSchema.safeParse({
     zonaComunId: formData.get("zonaComunId"),
-    inmuebleId: formData.get("inmuebleId"),
-    solicitadaPorId: formData.get("solicitadaPorId"),
     fechaInicio: formData.get("fechaInicio"),
     fechaFin: formData.get("fechaFin"),
     observaciones: formData.get("observaciones") ?? "",
@@ -97,21 +95,21 @@ export async function crearReserva(
     };
   }
 
-  const { zonaComunId, inmuebleId, solicitadaPorId, fechaInicio, fechaFin, observaciones } =
-    validado.data;
+  const { zonaComunId, fechaInicio, fechaFin, observaciones } = validado.data;
 
   try {
-    const administrador = await getAdministradorActual();
+    const { usuario, inmuebleActivo } = await getResidenteActual();
+
+    if (!inmuebleActivo) {
+      return { status: "error", message: "No tienes ningún inmueble activo vinculado." };
+    }
 
     const zonaComun = await prisma.zonaComun.findFirst({
       where: {
         id: zonaComunId,
         deletedAt: null,
         activa: true,
-        copropiedad: {
-          administradores: { some: { usuarioId: administrador.id, deletedAt: null } },
-          inmuebles: { some: { id: inmuebleId, deletedAt: null } },
-        },
+        copropiedadId: inmuebleActivo.inmueble.copropiedad.id,
       },
       select: { id: true },
     });
@@ -119,29 +117,17 @@ export async function crearReserva(
     if (!zonaComun) {
       return {
         status: "error",
-        message: "La zona común no existe, no está activa, o el inmueble no pertenece a esa copropiedad.",
-      };
-    }
-
-    const residenteValido = await prisma.usuarioInmueble.findFirst({
-      where: { inmuebleId, usuarioId: solicitadaPorId, activo: true, deletedAt: null },
-      select: { id: true },
-    });
-
-    if (!residenteValido) {
-      return {
-        status: "error",
-        message: "La persona seleccionada no es un residente activo de ese inmueble.",
+        message: "La zona común no existe o no está activa en tu copropiedad.",
       };
     }
 
     // Regla de negocio: un inmueble sin paz y salvo (vencido o en mora) no
     // puede solicitar reservas.
-    if (await inmuebleNoEstaAPazYSalvo(inmuebleId)) {
+    if (await inmuebleNoEstaAPazYSalvo(inmuebleActivo.inmueble.id)) {
       return {
         status: "error",
         message:
-          "Este inmueble tiene cuentas vencidas o en mora. Debe estar a paz y salvo para solicitar una reserva.",
+          "Tu inmueble tiene cuentas vencidas o en mora. Debe estar a paz y salvo para solicitar una reserva.",
       };
     }
 
@@ -158,19 +144,20 @@ export async function crearReserva(
     await prisma.reserva.create({
       data: {
         zonaComunId,
-        inmuebleId,
-        solicitadaPorId,
+        inmuebleId: inmuebleActivo.inmueble.id,
+        solicitadaPorId: usuario.id,
         fechaInicio: inicio,
         fechaFin: fin,
         observaciones: observaciones || null,
       },
     });
 
+    revalidatePath("/portal/reservas");
     revalidatePath("/dashboard/reservas");
 
     return { status: "success", message: "Reserva radicada como pendiente de aprobación." };
   } catch (error) {
-    console.error("crearReserva", error);
+    console.error("crearReservaResidente", error);
     return { status: "error", message: "No se pudo radicar la reserva." };
   }
 }

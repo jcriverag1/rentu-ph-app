@@ -67,7 +67,7 @@ export function CrearPqrsForm({
       <div>
         <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Radicar PQRS</h3>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Registra una petición, queja, reclamo o sugerencia a nombre de un residente.
+          Registra una petición, queja, reclamo o sugerencia dirigida a un residente.
         </p>
       </div>
 
@@ -112,12 +112,12 @@ export function CrearPqrsForm({
 
         <div className="flex flex-col gap-1">
           <label htmlFor={idResidente} className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            Radicado por
+            Dirigida a
           </label>
           {inmueble && inmueble.residentes.length > 0 ? (
             <select
               id={idResidente}
-              name="radicadoPorId"
+              name="dirigidoAId"
               required
               className="w-full rounded-md border border-zinc-300 px-2 py-1.5 text-sm focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950"
             >

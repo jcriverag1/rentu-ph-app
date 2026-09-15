@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { RolUsuario } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { EstadoAccionFormulario } from "@/lib/types/estado-accion";
 
@@ -37,6 +39,12 @@ export async function iniciarSesion(
     if (error) {
       return { status: "error", message: "Correo o contraseña incorrectos." };
     }
+
+    const usuario = await prisma.usuario.findFirst({
+      where: { email: validado.data.email, deletedAt: null },
+      select: { rol: true },
+    });
+    destino = usuario?.rol === RolUsuario.ADMINISTRADOR ? "/dashboard" : "/portal";
 
     const destinoParam = formData.get("next");
     if (typeof destinoParam === "string" && destinoParam.startsWith("/")) {

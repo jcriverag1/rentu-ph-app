@@ -33,7 +33,8 @@ export function PqrsList({ items }: { items: PqrsConDetalle[] }) {
               <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">{pqrs.titulo}</h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {ETIQUETAS_TIPO[pqrs.tipo] ?? pqrs.tipo} · {pqrs.inmueble.identificador} —{" "}
-                {pqrs.inmueble.copropiedad.nombre} · radicado por {pqrs.radicadoPor.nombre} ·{" "}
+                {pqrs.inmueble.copropiedad.nombre} · radicada por {pqrs.radicadoPor.nombre}
+                {pqrs.dirigidoA ? ` · dirigida a ${pqrs.dirigidoA.nombre}` : ""} ·{" "}
                 {formatearFecha(pqrs.createdAt)}
               </p>
             </div>

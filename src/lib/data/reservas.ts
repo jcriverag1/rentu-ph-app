@@ -69,44 +69,44 @@ export type ReservaConDetalle = Awaited<
 >[number];
 
 /**
- * Estructura anidada para el formulario de reservas: cada copropiedad trae
- * sus zonas comunes activas y sus inmuebles con residentes activos, para
- * armar selects en cascada 100% en el cliente.
+ * Zonas comunes activas de la copropiedad del residente, para elegir al
+ * radicar una reserva. `costo` se convierte a `number` porque un `Decimal`
+ * de Prisma no es un objeto plano y Next.js no permite pasarlo de un Server
+ * Component a un Client Component (este resultado alimenta
+ * `<CrearReservaForm>` en `src/app/portal/reservas/page.tsx`).
  */
-export const getCopropiedadesParaReservas = cache(async (administradorId: string) => {
-  return prisma.copropiedad.findMany({
-    where: {
-      deletedAt: null,
-      administradores: { some: { usuarioId: administradorId, deletedAt: null } },
-    },
+export const getZonasComunesDeCopropiedad = cache(async (copropiedadId: string) => {
+  const zonas = await prisma.zonaComun.findMany({
+    where: { copropiedadId, deletedAt: null, activa: true },
     orderBy: { nombre: "asc" },
+    select: { id: true, nombre: true, descripcion: true, aforo: true, costo: true },
+  });
+
+  return zonas.map((zona) => ({ ...zona, costo: Number(zona.costo) }));
+});
+
+export type ZonaComunParaResidente = Awaited<
+  ReturnType<typeof getZonasComunesDeCopropiedad>
+>[number];
+
+/** Reservas propias de un inmueble, para la vista "Mis reservas" del residente. */
+export const getReservasDeResidente = cache(async (inmuebleId: string) => {
+  return prisma.reserva.findMany({
+    where: { inmuebleId, deletedAt: null },
+    orderBy: { fechaInicio: "desc" },
     select: {
       id: true,
-      nombre: true,
-      zonasComunes: {
-        where: { deletedAt: null, activa: true },
-        orderBy: { nombre: "asc" },
-        select: { id: true, nombre: true },
-      },
-      inmuebles: {
-        where: { deletedAt: null },
-        orderBy: { identificador: "asc" },
-        select: {
-          id: true,
-          identificador: true,
-          residentes: {
-            where: { activo: true, deletedAt: null },
-            select: { usuarioId: true, usuario: { select: { nombre: true } } },
-          },
-        },
-      },
+      fechaInicio: true,
+      fechaFin: true,
+      estado: true,
+      observaciones: true,
+      createdAt: true,
+      zonaComun: { select: { nombre: true } },
     },
   });
 });
 
-export type CopropiedadParaReservas = Awaited<
-  ReturnType<typeof getCopropiedadesParaReservas>
->[number];
+export type ReservaDeResidente = Awaited<ReturnType<typeof getReservasDeResidente>>[number];
 
 /**
  * true si el inmueble tiene alguna cuenta de cobro VENCIDA o EN_MORA (no

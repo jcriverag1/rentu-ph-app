@@ -15,11 +15,10 @@ export const crearZonaComunSchema = z.object({
   costo: montoDecimalOpcionalSchema,
 });
 
+/** Solo para residentes: `inmuebleId`/`solicitadaPorId` se derivan de la sesión, nunca del formulario. */
 export const crearReservaSchema = z
   .object({
     zonaComunId: z.uuid("Zona común inválida"),
-    inmuebleId: z.uuid("Inmueble inválido"),
-    solicitadaPorId: z.uuid("Selecciona quién solicita la reserva"),
     fechaInicio: z
       .string()
       .refine((valor) => !Number.isNaN(Date.parse(valor)), "Fecha de inicio inválida"),
